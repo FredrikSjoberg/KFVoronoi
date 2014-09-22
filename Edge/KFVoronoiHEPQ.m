@@ -45,7 +45,7 @@
 #pragma mark - Private
 @interface KFVoronoiHEPQ ()
 
-@property (nonatomic, strong) NSMutableArray *hash;
+@property (nonatomic, strong) NSMutableArray *hashHEPQ;
 @property (nonatomic) int HEPQcount;
 @property (nonatomic) int minBucket;
 @property (nonatomic) int hashSize;
@@ -85,20 +85,20 @@
 #pragma mark - (Private Methods)
 -(void) setupHash
 {
-    _hash = [[NSMutableArray alloc] initWithCapacity:self.hashSize];
+    _hashHEPQ = [[NSMutableArray alloc] initWithCapacity:self.hashSize];
     
     for (int i = 0; i < self.hashSize; i++) {
         // Create dummy (nil ref he)
         KFVoronoiHalfedge *he = [[KFVoronoiHalfedge alloc] initDummy];
         
         // Insert at index i
-        [[self hash] addObject:he];
+        [[self hashHEPQ] addObject:he];
     }
 }
 
 -(BOOL) isEmpty:(int)bucket
 {
-    KFVoronoiHalfedge *he = [self.hash objectAtIndex:bucket];
+    KFVoronoiHalfedge *he = [self.hashHEPQ objectAtIndex:bucket];
 	return (he.nextInPriorityQueue == nil);
 }
 
@@ -134,7 +134,7 @@
 -(CGPoint) minPoint
 {
     [self adjustMinBucket];
-	KFVoronoiHalfedge *halfEdge = [self.hash objectAtIndex:self.minBucket];
+	KFVoronoiHalfedge *halfEdge = [self.hashHEPQ objectAtIndex:self.minBucket];
 	KFVoronoiHalfedge *answer = halfEdge.nextInPriorityQueue;
 	
 	return CGPointMake(answer.vertex.point.x, answer.yStar);
@@ -149,7 +149,7 @@
 	if (insertionBucket < self.minBucket) {
 		self.minBucket = insertionBucket;
 	}
-	previous = [self.hash objectAtIndex:insertionBucket];
+	previous = [self.hashHEPQ objectAtIndex:insertionBucket];
 	
 	while (((next = previous.nextInPriorityQueue) != nil) &&
            (halfEdge.yStar > next.yStar || (halfEdge.yStar == next.yStar && halfEdge.vertex.point.x > next.vertex.point.x))) {
@@ -167,7 +167,7 @@
 	int removalBucket = [self bucket:halfEdge];
 	
 	if (halfEdge.vertex != nil) {
-		previous = [self.hash objectAtIndex:removalBucket];
+		previous = [self.hashHEPQ objectAtIndex:removalBucket];
 		while (previous.nextInPriorityQueue != halfEdge) {
 			previous = previous.nextInPriorityQueue;
 		}
@@ -181,7 +181,7 @@
 
 -(KFVoronoiHalfedge *) extractMin
 {
-    KFVoronoiHalfedge *testHalfEdge = [self.hash objectAtIndex:self.minBucket];
+    KFVoronoiHalfedge *testHalfEdge = [self.hashHEPQ objectAtIndex:self.minBucket];
 	KFVoronoiHalfedge *answer = testHalfEdge.nextInPriorityQueue;
 	
 	testHalfEdge.nextInPriorityQueue = answer.nextInPriorityQueue;

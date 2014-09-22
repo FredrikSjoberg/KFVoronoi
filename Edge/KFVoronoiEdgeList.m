@@ -50,7 +50,7 @@
 @property (nonatomic) uint currentEdgeIndex;
 @property (nonatomic) uint currentVertexIndex;
 
-@property (nonatomic, strong) NSMutableArray *hash;
+@property (nonatomic, strong) NSMutableArray *hashEdgeList;
 @property (nonatomic, strong) KFVoronoiHalfedge *leftEnd;
 @property (nonatomic, strong) KFVoronoiHalfedge *rightEnd;
 @property (nonatomic, strong) KFVoronoiEdge *deleted;
@@ -84,7 +84,7 @@
 #pragma mark - (Private Methods)
 -(void) setupHash
 {
-    _hash = [[NSMutableArray alloc] initWithCapacity:self.hashSize];
+    _hashEdgeList = [[NSMutableArray alloc] initWithCapacity:self.hashSize];
     
     // Create Dummies
     _leftEnd = [[KFVoronoiHalfedge alloc] initDummy];
@@ -99,13 +99,13 @@
     self.rightEnd.edgeListRightNeighbor = nil;
     
     // LeftEnd at index 0
-    [self.hash insertObject:self.leftEnd atIndex:0];
+    [self.hashEdgeList insertObject:self.leftEnd atIndex:0];
     for (int i = 0; i < self.hashSize - 1; i++) {
         // Null-objects for the rest
-        [self.hash addObject:[NSNull null]];
+        [self.hashEdgeList addObject:[NSNull null]];
     }
     // Except last object that is rightEnd
-    [self.hash replaceObjectAtIndex:self.hashSize - 1 withObject:self.rightEnd];
+    [self.hashEdgeList replaceObjectAtIndex:self.hashSize - 1 withObject:self.rightEnd];
 }
 
 -(KFVoronoiHalfedge *) getHash:(int)b
@@ -116,7 +116,7 @@
 		return nil;
 	}
     
-    id cast = [self.hash objectAtIndex:b];
+    id cast = [self.hashEdgeList objectAtIndex:b];
     
     if ([cast isMemberOfClass:[NSNull class]]) {
         halfEdge = nil;
@@ -127,7 +127,7 @@
     
     if (halfEdge != nil && halfEdge.edge == self.deleted) {
 		// This means the hash table points to a deleted halfedge and we need to patch it.
-		[self.hash replaceObjectAtIndex:b withObject:[NSNull null]];
+		[self.hashEdgeList replaceObjectAtIndex:b withObject:[NSNull null]];
         return nil;
 	}
     return halfEdge;
@@ -180,7 +180,7 @@
 	
 	// update the hash table and reference counts
 	if ((bucket > 0) && (bucket < (self.hashSize - 1))) {
-		[self.hash replaceObjectAtIndex:bucket withObject:halfEdge];
+		[self.hashEdgeList replaceObjectAtIndex:bucket withObject:halfEdge];
 	}
 	return halfEdge;
 }
